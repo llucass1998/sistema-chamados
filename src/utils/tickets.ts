@@ -55,14 +55,14 @@ export const sortTicketsByDate = (tickets: Ticket[]) =>
   });
 
 export const statusClasses: Record<TicketStatus, string> = {
-  Aberto: 'border-blue-500/40 bg-blue-500/10 text-blue-200',
-  'Em andamento': 'border-amber-500/40 bg-amber-500/10 text-amber-200',
-  Resolvido: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
+  Aberto: 'border-sky-200 bg-sky-50 text-sky-800',
+  'Em andamento': 'border-amber-200 bg-amber-50 text-amber-800',
+  Resolvido: 'border-emerald-200 bg-emerald-50 text-emerald-800',
 };
 
 export const priorityClasses: Record<TicketPriority, string> = {
-  Baixa: 'border-slate-500/40 bg-slate-500/10 text-slate-200',
-  Media: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200',
-  Alta: 'border-orange-500/40 bg-orange-500/10 text-orange-200',
-  Urgente: 'border-red-500/40 bg-red-500/10 text-red-200',
+  Baixa: 'border-slate-200 bg-slate-50 text-slate-700',
+  Media: 'border-indigo-200 bg-indigo-50 text-indigo-800',
+  Alta: 'border-orange-200 bg-orange-50 text-orange-800',
+  Urgente: 'border-red-200 bg-red-50 text-red-800',
 };

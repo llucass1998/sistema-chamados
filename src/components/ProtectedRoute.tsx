@@ -6,8 +6,8 @@ function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 px-6 py-5 shadow-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-[#f4f6fb] p-6 text-slate-950">
+        <div className="rounded-lg border border-slate-200 bg-white px-6 py-5 text-sm font-bold shadow-xl shadow-slate-200/70">
           Carregando acesso...
         </div>
       </div>
