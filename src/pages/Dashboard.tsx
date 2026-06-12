@@ -6,6 +6,7 @@ import AppShell from '../components/AppShell';
 import MetricCard from '../components/MetricCard';
 import StatusAlert from '../components/StatusAlert';
 import TicketCard from '../components/TicketCard';
+import TicketDetailsModal from '../components/TicketDetailsModal';
 import { auth, db } from '../firebaseConfig';
 import { useAuth } from '../hooks/useAuth';
 import type { Ticket, TicketCategory, TicketPriority } from '../types';
@@ -33,6 +34,9 @@ function Dashboard() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState<TicketForm>(initialForm);
+  const [categoryFilter, setCategoryFilter] = useState<TicketCategory | 'Todas'>('Todas');
+  const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'Todas'>('Todas');
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -66,6 +70,17 @@ function Dashboard() {
       closed: tickets.filter((ticket) => ticket.status === 'Fechado').length,
     }),
     [tickets],
+  );
+
+  const filteredTickets = useMemo(
+    () =>
+      tickets.filter((ticket) => {
+        const matchesCategory = categoryFilter === 'Todas' || ticket.categoria === categoryFilter;
+        const matchesPriority = priorityFilter === 'Todas' || ticket.prioridade === priorityFilter;
+
+        return matchesCategory && matchesPriority;
+      }),
+    [categoryFilter, priorityFilter, tickets],
   );
 
   const handleLogout = async () => {
@@ -149,6 +164,10 @@ function Dashboard() {
         ) : null
       }
     >
+      {selectedTicket && (
+        <TicketDetailsModal ticket={selectedTicket} onClose={() => setSelectedTicket(null)} />
+      )}
+
       <StatusAlert message={message} type="success" />
       <StatusAlert message={errorMessage} type="error" />
 
@@ -166,15 +185,53 @@ function Dashboard() {
             <p className="mt-1 text-sm text-slate-500">Acompanhe cada solicitacao aberta por voce.</p>
           </div>
 
-          <button
-            onClick={() => {
-              clearMessages();
-              setIsCreating((current) => !current);
-            }}
-            className="rounded-md bg-[#0f172a] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
-          >
-            {isCreating ? 'Fechar formulario' : 'Novo chamado'}
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div>
+              <label className="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+                Categoria
+              </label>
+              <select
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value as TicketCategory | 'Todas')}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100 sm:w-40"
+              >
+                <option value="Todas">Todas</option>
+                {ticketCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+                Prioridade
+              </label>
+              <select
+                value={priorityFilter}
+                onChange={(event) => setPriorityFilter(event.target.value as TicketPriority | 'Todas')}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100 sm:w-40"
+              >
+                <option value="Todas">Todas</option>
+                {ticketPriorities.map((priority) => (
+                  <option key={priority} value={priority}>
+                    {priority}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={() => {
+                clearMessages();
+                setIsCreating((current) => !current);
+              }}
+              className="rounded-md bg-[#0f172a] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
+            >
+              {isCreating ? 'Fechar formulario' : 'Novo chamado'}
+            </button>
+          </div>
         </div>
 
         {isCreating && (
@@ -260,12 +317,14 @@ function Dashboard() {
         )}
 
         <div className="grid gap-3 p-5">
-          {tickets.length === 0 ? (
+          {filteredTickets.length === 0 ? (
             <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm font-semibold text-slate-500">
-              Nenhum chamado aberto ate o momento.
+              Nenhum chamado encontrado para os filtros atuais.
             </div>
           ) : (
-            tickets.map((ticket) => <TicketCard key={ticket.id} ticket={ticket} />)
+            filteredTickets.map((ticket) => (
+              <TicketCard key={ticket.id} ticket={ticket} onOpenDetails={setSelectedTicket} />
+            ))
           )}
         </div>
       </section>

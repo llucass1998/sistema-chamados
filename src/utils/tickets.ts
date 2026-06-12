@@ -1,5 +1,5 @@
 import type { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
-import type { Ticket, TicketCategory, TicketPriority, TicketStatus } from '../types';
+import type { Ticket, TicketCategory, TicketComment, TicketPriority, TicketStatus, UserRole } from '../types';
 import { ticketCategories, ticketPriorities, ticketStatuses } from '../types';
 
 const isTicketStatus = (value: unknown): value is TicketStatus =>
@@ -42,6 +42,31 @@ export const ticketFromDoc = (snapshot: QueryDocumentSnapshot<DocumentData>): Ti
   };
 };
 
+const normalizeRole = (value: unknown): UserRole => {
+  if (value === 'admin' || value === 'tecnico') {
+    return value;
+  }
+
+  return 'colaborador';
+};
+
+export const commentFromDoc = (snapshot: QueryDocumentSnapshot<DocumentData>): TicketComment => {
+  const data = snapshot.data();
+
+  return {
+    id: snapshot.id,
+    message: String(data.message ?? ''),
+    authorId: String(data.authorId ?? ''),
+    authorName: String(data.authorName ?? 'Usuario'),
+    authorRole: normalizeRole(data.authorRole),
+    createdAt: data.createdAt ?? null,
+    attachmentName: data.attachmentName,
+    attachmentUrl: data.attachmentUrl,
+    attachmentPath: data.attachmentPath,
+    attachmentType: data.attachmentType,
+  };
+};
+
 export const formatDate = (value: Ticket['createdAt']) => {
   if (!value) {
     return 'Sem data';
@@ -62,6 +87,14 @@ export const sortTicketsByDate = (tickets: Ticket[]) =>
     const secondDate = second.createdAt?.toMillis() ?? 0;
 
     return secondDate - firstDate;
+  });
+
+export const sortCommentsByDate = (comments: TicketComment[]) =>
+  [...comments].sort((first, second) => {
+    const firstDate = first.createdAt?.toMillis() ?? 0;
+    const secondDate = second.createdAt?.toMillis() ?? 0;
+
+    return firstDate - secondDate;
   });
 
 export const statusClasses: Record<TicketStatus, string> = {

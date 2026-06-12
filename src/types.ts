@@ -35,3 +35,16 @@ export interface Ticket {
   closedBy?: string;
   tecnicoResponsavel?: string;
 }
+
+export interface TicketComment {
+  id: string;
+  message: string;
+  authorId: string;
+  authorName: string;
+  authorRole: UserRole;
+  createdAt?: Timestamp | null;
+  attachmentName?: string;
+  attachmentUrl?: string;
+  attachmentPath?: string;
+  attachmentType?: string;
+}

@@ -2,7 +2,7 @@
 
 Sistema web para abertura, acompanhamento e gerenciamento de chamados internos de suporte tecnico.
 
-O projeto foi desenvolvido com React, TypeScript, Vite, Tailwind CSS e Firebase, usando Authentication para login/cadastro e Firestore para armazenar usuarios e chamados.
+O projeto foi desenvolvido com React, TypeScript, Vite, Tailwind CSS e Firebase, usando Authentication para login/cadastro, Firestore para armazenar usuarios/chamados/comentarios e Storage para anexos.
 
 ## Sobre o projeto
 
@@ -21,10 +21,17 @@ Este projeto conversa diretamente com uma rotina real de suporte tecnico, por is
 - Prioridade do chamado
 - Status do chamado: `Aberto`, `Em andamento` e `Fechado`
 - Painel tecnico/admin para visualizar todos os chamados
+- Filtros por status, categoria e prioridade
 - Atualizacao de status em tempo real via Firestore
 - Fechamento de chamado pelo tecnico/admin
 - Registro de data e responsavel pelo fechamento
+- Comentarios/respostas dentro do chamado
+- Upload de print/anexo em imagem ou PDF
+- Criacao de contas de tecnico/admin pelo painel administrativo
 - Resumo com indicadores de chamados
+- Regras de seguranca do Firestore e Storage
+- Configuracao para deploy no Firebase Hosting
+- Testes automatizados com Vitest
 - Layout responsivo com Tailwind CSS
 
 ## Tecnologias utilizadas
@@ -35,8 +42,27 @@ Este projeto conversa diretamente com uma rotina real de suporte tecnico, por is
 - Tailwind CSS
 - Firebase Authentication
 - Cloud Firestore
+- Firebase Storage
 - React Router DOM
+- Vitest
+- Testing Library
 - ESLint
+
+## Prints
+
+Sugestao de prints para adicionar ao README depois de configurar o Firebase real:
+
+- Tela de login
+- Tela de cadastro
+- Portal do colaborador com chamados
+- Painel tecnico/admin com filtros
+- Modal de detalhes com comentarios e anexo
+
+Coloque as imagens em:
+
+```text
+docs/screenshots/
+```
 
 ## Estrutura do projeto
 
@@ -134,6 +160,24 @@ Exemplo de documento:
 }
 ```
 
+### tickets/{ticketId}/comments
+
+Exemplo de documento:
+
+```json
+{
+  "message": "Chamado recebido. Vamos verificar o equipamento.",
+  "authorId": "firebase-user-id",
+  "authorName": "Tecnico T.I",
+  "authorRole": "tecnico",
+  "createdAt": "timestamp",
+  "attachmentName": "print-erro.png",
+  "attachmentUrl": "https://...",
+  "attachmentPath": "ticket-attachments/ticket-id/print-erro.png",
+  "attachmentType": "image/png"
+}
+```
+
 ## Tipos de conta
 
 O sistema trabalha com dois niveis principais de acesso:
@@ -171,23 +215,62 @@ Depois disso, o usuario passa a visualizar o botao `Painel tecnico` no dashboard
 
 No painel tecnico, o responsavel de T.I pode alterar o status para `Em andamento` ou clicar em `Fechar chamado`. Quando o chamado e fechado, o sistema registra `closedAt` e `closedBy`.
 
+Usuarios com `role: "admin"` tambem podem criar novas contas de tecnico/admin diretamente pelo painel.
+
+## Regras de seguranca
+
+O projeto inclui:
+
+- `firestore.rules`
+- `storage.rules`
+
+Essas regras limitam:
+
+- colaborador le apenas os proprios chamados;
+- tecnico/admin le todos os chamados;
+- tecnico/admin pode atualizar status e fechar atendimento;
+- apenas admin pode criar usuarios tecnicos/admin;
+- anexos ficam restritos aos envolvidos no chamado;
+- anexos aceitam imagens ou PDF com limite de 5MB.
+
+Para publicar as regras:
+
+```bash
+npx firebase-tools deploy --only firestore:rules,storage
+```
+
+## Deploy
+
+O projeto esta preparado para Firebase Hosting com `firebase.json`.
+
+Crie uma copia de `.firebaserc.example`:
+
+```bash
+cp .firebaserc.example .firebaserc
+```
+
+Troque `seu-projeto-firebase` pelo ID do seu projeto Firebase e rode:
+
+```bash
+npm run deploy:firebase
+```
+
 ## Scripts disponiveis
 
 ```bash
 npm run dev      # Inicia o servidor de desenvolvimento
 npm run build    # Gera build de producao
 npm run lint     # Executa o ESLint
+npm run test     # Executa os testes automatizados
 npm run preview  # Abre a build localmente
+npm run deploy:firebase # Build + deploy no Firebase Hosting
 ```
 
 ## Melhorias futuras
 
-- Comentarios/respostas dentro do chamado
-- Upload de anexos
-- Filtro por categoria e prioridade
-- Regras de seguranca mais detalhadas no Firebase
 - Notificacoes por e-mail
 - Dashboard com graficos
+- Historico de SLA/tempo medio de atendimento
 
 ## Autor
 

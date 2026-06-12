@@ -1,0 +1,34 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userData() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isStaff() {
+      return isSignedIn() && userData().role in ['tecnico', 'admin'];
+    }
+
+    function ticketData(ticketId) {
+      return firestore.get(/databases/(default)/documents/tickets/$(ticketId)).data;
+    }
+
+    function canAccessTicket(ticketId) {
+      return isStaff() || ticketData(ticketId).userId == request.auth.uid;
+    }
+
+    match /ticket-attachments/{ticketId}/{fileName} {
+      allow read: if isSignedIn() && canAccessTicket(ticketId);
+
+      allow write: if isSignedIn()
+        && canAccessTicket(ticketId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|application/pdf');
+    }
+  }
+}

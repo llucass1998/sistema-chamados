@@ -4,12 +4,14 @@ import { signOut } from 'firebase/auth';
 import { collection, doc, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import AppShell from '../components/AppShell';
 import MetricCard from '../components/MetricCard';
+import StaffAccountForm from '../components/StaffAccountForm';
 import StatusAlert from '../components/StatusAlert';
 import TicketCard from '../components/TicketCard';
+import TicketDetailsModal from '../components/TicketDetailsModal';
 import { auth, db } from '../firebaseConfig';
 import { useAuth } from '../hooks/useAuth';
-import type { Ticket, TicketStatus } from '../types';
-import { ticketStatuses } from '../types';
+import type { Ticket, TicketCategory, TicketPriority, TicketStatus } from '../types';
+import { ticketCategories, ticketPriorities, ticketStatuses } from '../types';
 import { sortTicketsByDate, ticketFromDoc } from '../utils/tickets';
 
 function Admin() {
@@ -18,6 +20,9 @@ function Admin() {
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'Todos'>('Todos');
+  const [categoryFilter, setCategoryFilter] = useState<TicketCategory | 'Todas'>('Todas');
+  const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'Todas'>('Todas');
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [updatingId, setUpdatingId] = useState('');
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -54,11 +59,22 @@ function Admin() {
 
   const filteredTickets = useMemo(() => {
     if (statusFilter === 'Todos') {
-      return tickets;
+      return tickets.filter((ticket) => {
+        const matchesCategory = categoryFilter === 'Todas' || ticket.categoria === categoryFilter;
+        const matchesPriority = priorityFilter === 'Todas' || ticket.prioridade === priorityFilter;
+
+        return matchesCategory && matchesPriority;
+      });
     }
 
-    return tickets.filter((ticket) => ticket.status === statusFilter);
-  }, [statusFilter, tickets]);
+    return tickets.filter((ticket) => {
+      const matchesStatus = ticket.status === statusFilter;
+      const matchesCategory = categoryFilter === 'Todas' || ticket.categoria === categoryFilter;
+      const matchesPriority = priorityFilter === 'Todas' || ticket.prioridade === priorityFilter;
+
+      return matchesStatus && matchesCategory && matchesPriority;
+    });
+  }, [categoryFilter, priorityFilter, statusFilter, tickets]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -134,6 +150,10 @@ function Admin() {
         </Link>
       }
     >
+      {selectedTicket && (
+        <TicketDetailsModal ticket={selectedTicket} onClose={() => setSelectedTicket(null)} />
+      )}
+
       <StatusAlert message={message} type="success" />
       <StatusAlert message={errorMessage} type="error" />
 
@@ -145,6 +165,8 @@ function Admin() {
         <MetricCard label="Urgentes" value={metrics.urgent} tone="red" />
       </section>
 
+      {profile?.role === 'admin' && <StaffAccountForm />}
+
       <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -152,7 +174,8 @@ function Admin() {
             <p className="mt-1 text-sm text-slate-500">Visualize solicitante, prioridade, categoria e status.</p>
           </div>
 
-          <div className="flex flex-col gap-2 sm:w-56">
+          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Status</label>
             <select
               value={statusFilter}
@@ -166,6 +189,37 @@ function Admin() {
                 </option>
               ))}
             </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Categoria</label>
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value as TicketCategory | 'Todas')}
+              className="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            >
+              <option value="Todas">Todas</option>
+              {ticketCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Prioridade</label>
+            <select
+              value={priorityFilter}
+              onChange={(event) => setPriorityFilter(event.target.value as TicketPriority | 'Todas')}
+              className="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            >
+              <option value="Todas">Todas</option>
+              {ticketPriorities.map((priority) => (
+                <option key={priority} value={priority}>
+                  {priority}
+                </option>
+              ))}
+            </select>
+          </div>
           </div>
         </div>
 
@@ -181,6 +235,7 @@ function Admin() {
                 ticket={ticket}
                 showUser
                 updating={updatingId === ticket.id}
+                onOpenDetails={setSelectedTicket}
                 onStatusChange={handleStatusChange}
               />
             ))
