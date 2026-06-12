@@ -165,7 +165,17 @@ function Admin() {
         <MetricCard label="Urgentes" value={metrics.urgent} tone="red" />
       </section>
 
-      {profile?.role === 'admin' && <StaffAccountForm />}
+      {profile?.role === 'admin' ? (
+        <StaffAccountForm />
+      ) : (
+        <section className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm">
+          <p className="text-sm font-black text-amber-950">Criacao de contas restrita ao admin</p>
+          <p className="mt-1 text-sm leading-6 text-amber-900">
+            Sua conta atual consegue acompanhar e fechar chamados como tecnico. Para criar novos usuarios de T.I/admin,
+            entre com uma conta que tenha <strong>role: admin</strong> no Firestore.
+          </p>
+        </section>
+      )}
 
       <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">

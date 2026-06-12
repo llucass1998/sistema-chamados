@@ -215,7 +215,15 @@ Depois disso, o usuario passa a visualizar o botao `Painel tecnico` no dashboard
 
 No painel tecnico, o responsavel de T.I pode alterar o status para `Em andamento` ou clicar em `Fechar chamado`. Quando o chamado e fechado, o sistema registra `closedAt` e `closedBy`.
 
-Usuarios com `role: "admin"` tambem podem criar novas contas de tecnico/admin diretamente pelo painel.
+Usuarios com `role: "admin"` tambem podem criar novas contas de tecnico/admin diretamente pelo painel. O primeiro admin precisa ser definido manualmente no Firestore, alterando o documento do usuario em `users` para:
+
+```json
+{
+  "role": "admin"
+}
+```
+
+Depois de entrar novamente com essa conta, o bloco `Criar conta de T.I/admin` aparece no painel tecnico.
 
 ## Regras de seguranca
 

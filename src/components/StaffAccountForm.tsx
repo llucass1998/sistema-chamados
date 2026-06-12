@@ -81,8 +81,9 @@ function StaffAccountForm() {
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="text-lg font-black tracking-tight text-slate-950">Criar conta de T.I/admin</h2>
+      <div className="border-b border-slate-200 bg-sky-50 px-5 py-4">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Area do administrador</p>
+        <h2 className="mt-2 text-lg font-black tracking-tight text-slate-950">Criar conta de T.I/admin</h2>
         <p className="mt-1 text-sm text-slate-500">
           Crie acessos internos para a equipe tecnica gerenciar e fechar chamados.
         </p>
