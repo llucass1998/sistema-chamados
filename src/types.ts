@@ -1,6 +1,6 @@
 import type { Timestamp } from 'firebase/firestore';
 
-export const ticketStatuses = ['Aberto', 'Em andamento', 'Resolvido'] as const;
+export const ticketStatuses = ['Aberto', 'Em andamento', 'Fechado'] as const;
 export const ticketPriorities = ['Baixa', 'Media', 'Alta', 'Urgente'] as const;
 export const ticketCategories = ['Hardware', 'Software', 'Rede', 'Acesso', 'Outros'] as const;
 
@@ -31,5 +31,7 @@ export interface Ticket {
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
   resolvedAt?: Timestamp | null;
+  closedAt?: Timestamp | null;
+  closedBy?: string;
   tecnicoResponsavel?: string;
 }

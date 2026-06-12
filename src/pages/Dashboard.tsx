@@ -63,7 +63,7 @@ function Dashboard() {
       total: tickets.length,
       open: tickets.filter((ticket) => ticket.status === 'Aberto').length,
       progress: tickets.filter((ticket) => ticket.status === 'Em andamento').length,
-      resolved: tickets.filter((ticket) => ticket.status === 'Resolvido').length,
+      closed: tickets.filter((ticket) => ticket.status === 'Fechado').length,
     }),
     [tickets],
   );
@@ -156,7 +156,7 @@ function Dashboard() {
         <MetricCard label="Total" value={metrics.total} />
         <MetricCard label="Abertos" value={metrics.open} tone="blue" />
         <MetricCard label="Em andamento" value={metrics.progress} tone="amber" />
-        <MetricCard label="Resolvidos" value={metrics.resolved} tone="emerald" />
+        <MetricCard label="Fechados" value={metrics.closed} tone="emerald" />
       </section>
 
       <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">

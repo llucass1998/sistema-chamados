@@ -11,6 +11,14 @@ const isTicketPriority = (value: unknown): value is TicketPriority =>
 const isTicketCategory = (value: unknown): value is TicketCategory =>
   ticketCategories.includes(value as TicketCategory);
 
+const normalizeStatus = (value: unknown): TicketStatus => {
+  if (value === 'Resolvido') {
+    return 'Fechado';
+  }
+
+  return isTicketStatus(value) ? value : 'Aberto';
+};
+
 export const ticketFromDoc = (snapshot: QueryDocumentSnapshot<DocumentData>): Ticket => {
   const data = snapshot.data();
 
@@ -20,7 +28,7 @@ export const ticketFromDoc = (snapshot: QueryDocumentSnapshot<DocumentData>): Ti
     descricao: String(data.descricao ?? 'Sem descricao informada.'),
     categoria: isTicketCategory(data.categoria) ? data.categoria : 'Outros',
     prioridade: isTicketPriority(data.prioridade) ? data.prioridade : 'Media',
-    status: isTicketStatus(data.status) ? data.status : 'Aberto',
+    status: normalizeStatus(data.status),
     userId: String(data.userId ?? ''),
     userEmail: String(data.userEmail ?? 'Sem e-mail'),
     userName: String(data.userName ?? 'Colaborador'),
@@ -28,6 +36,8 @@ export const ticketFromDoc = (snapshot: QueryDocumentSnapshot<DocumentData>): Ti
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
     resolvedAt: data.resolvedAt ?? null,
+    closedAt: data.closedAt ?? data.resolvedAt ?? null,
+    closedBy: data.closedBy,
     tecnicoResponsavel: data.tecnicoResponsavel,
   };
 };
@@ -57,7 +67,7 @@ export const sortTicketsByDate = (tickets: Ticket[]) =>
 export const statusClasses: Record<TicketStatus, string> = {
   Aberto: 'border-sky-200 bg-sky-50 text-sky-800',
   'Em andamento': 'border-amber-200 bg-amber-50 text-amber-800',
-  Resolvido: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+  Fechado: 'border-emerald-200 bg-emerald-50 text-emerald-800',
 };
 
 export const priorityClasses: Record<TicketPriority, string> = {

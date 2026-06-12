@@ -19,9 +19,11 @@ Este projeto conversa diretamente com uma rotina real de suporte tecnico, por is
 - Listagem dos chamados do usuario logado
 - Categoria do chamado
 - Prioridade do chamado
-- Status do chamado: `Aberto`, `Em andamento` e `Resolvido`
+- Status do chamado: `Aberto`, `Em andamento` e `Fechado`
 - Painel tecnico/admin para visualizar todos os chamados
 - Atualizacao de status em tempo real via Firestore
+- Fechamento de chamado pelo tecnico/admin
+- Registro de data e responsavel pelo fechamento
 - Resumo com indicadores de chamados
 - Layout responsivo com Tailwind CSS
 
@@ -126,9 +128,18 @@ Exemplo de documento:
   "userName": "Lucas Souza",
   "companyId": "EMP-2026",
   "createdAt": "timestamp",
-  "updatedAt": "timestamp"
+  "updatedAt": "timestamp",
+  "closedAt": null,
+  "closedBy": null
 }
 ```
+
+## Tipos de conta
+
+O sistema trabalha com dois niveis principais de acesso:
+
+- Cliente/colaborador: abre chamados e acompanha apenas os proprios chamados.
+- Tecnico/admin: visualiza todos os chamados, muda o andamento e fecha o atendimento.
 
 ## Como acessar o painel tecnico/admin
 
@@ -157,6 +168,8 @@ Ou para acesso administrativo:
 ```
 
 Depois disso, o usuario passa a visualizar o botao `Painel tecnico` no dashboard.
+
+No painel tecnico, o responsavel de T.I pode alterar o status para `Em andamento` ou clicar em `Fechar chamado`. Quando o chamado e fechado, o sistema registra `closedAt` e `closedBy`.
 
 ## Scripts disponiveis
 

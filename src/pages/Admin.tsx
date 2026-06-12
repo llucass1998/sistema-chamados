@@ -9,6 +9,7 @@ import TicketCard from '../components/TicketCard';
 import { auth, db } from '../firebaseConfig';
 import { useAuth } from '../hooks/useAuth';
 import type { Ticket, TicketStatus } from '../types';
+import { ticketStatuses } from '../types';
 import { sortTicketsByDate, ticketFromDoc } from '../utils/tickets';
 
 function Admin() {
@@ -45,7 +46,7 @@ function Admin() {
       total: tickets.length,
       open: tickets.filter((ticket) => ticket.status === 'Aberto').length,
       progress: tickets.filter((ticket) => ticket.status === 'Em andamento').length,
-      resolved: tickets.filter((ticket) => ticket.status === 'Resolvido').length,
+      closed: tickets.filter((ticket) => ticket.status === 'Fechado').length,
       urgent: tickets.filter((ticket) => ticket.prioridade === 'Urgente').length,
     }),
     [tickets],
@@ -74,7 +75,17 @@ function Admin() {
         status,
         updatedAt: serverTimestamp(),
         tecnicoResponsavel: profile?.login ?? 'Tecnico',
-        ...(status === 'Resolvido' ? { resolvedAt: serverTimestamp() } : { resolvedAt: null }),
+        ...(status === 'Fechado'
+          ? {
+              closedAt: serverTimestamp(),
+              closedBy: profile?.login ?? 'Tecnico',
+              resolvedAt: serverTimestamp(),
+            }
+          : {
+              closedAt: null,
+              closedBy: null,
+              resolvedAt: null,
+            }),
       });
 
       setMessage('Status atualizado com sucesso.');
@@ -130,7 +141,7 @@ function Admin() {
         <MetricCard label="Total" value={metrics.total} />
         <MetricCard label="Abertos" value={metrics.open} tone="blue" />
         <MetricCard label="Em andamento" value={metrics.progress} tone="amber" />
-        <MetricCard label="Resolvidos" value={metrics.resolved} tone="emerald" />
+        <MetricCard label="Fechados" value={metrics.closed} tone="emerald" />
         <MetricCard label="Urgentes" value={metrics.urgent} tone="red" />
       </section>
 
@@ -149,9 +160,11 @@ function Admin() {
               className="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
             >
               <option value="Todos">Todos</option>
-              <option value="Aberto">Aberto</option>
-              <option value="Em andamento">Em andamento</option>
-              <option value="Resolvido">Resolvido</option>
+              {ticketStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
             </select>
           </div>
         </div>

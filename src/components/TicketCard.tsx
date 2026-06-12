@@ -35,6 +35,8 @@ function TicketCard({ ticket, showUser = false, onStatusChange, updating = false
             {showUser && <span>Solicitante: {ticket.userName}</span>}
             {showUser && <span>E-mail: {ticket.userEmail}</span>}
             {ticket.tecnicoResponsavel && <span>Tecnico: {ticket.tecnicoResponsavel}</span>}
+            {ticket.closedAt && <span>Fechado em: {formatDate(ticket.closedAt)}</span>}
+            {ticket.closedBy && <span>Fechado por: {ticket.closedBy}</span>}
             <span>Empresa: {ticket.companyId}</span>
           </div>
         </div>
@@ -56,6 +58,14 @@ function TicketCard({ ticket, showUser = false, onStatusChange, updating = false
                 </option>
               ))}
             </select>
+            <button
+              type="button"
+              disabled={updating || ticket.status === 'Fechado'}
+              onClick={() => onStatusChange(ticket.id, 'Fechado')}
+              className="rounded-md bg-emerald-700 px-3 py-2 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+            >
+              {ticket.status === 'Fechado' ? 'Chamado fechado' : 'Fechar chamado'}
+            </button>
           </div>
         )}
       </div>
