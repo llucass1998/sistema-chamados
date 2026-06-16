@@ -115,11 +115,11 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6">
-      <section className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 px-4 py-6 backdrop-blur-sm">
+      <section className="enterprise-panel flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden">
         <header className="flex flex-col gap-4 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Detalhes do chamado</p>
+            <p className="enterprise-kicker">Detalhes do chamado</p>
             <h2 className="mt-2 text-xl font-black tracking-tight text-slate-950">{ticket.motivo}</h2>
             <p className="mt-1 text-sm text-slate-500">
               {ticket.status} - {ticket.categoria} - {ticket.prioridade}
@@ -129,7 +129,7 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            className="enterprise-button-secondary px-4 py-2 text-sm"
           >
             Fechar
           </button>
@@ -137,18 +137,18 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
 
         <div className="grid min-h-0 flex-1 gap-0 overflow-hidden lg:grid-cols-[1fr_320px]">
           <div className="min-h-0 overflow-y-auto px-5 py-4">
-            <p className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+            <p className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-sm leading-6 text-slate-700">
               {ticket.descricao}
             </p>
 
             <div className="mt-5 grid gap-3">
               {comments.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm font-semibold text-slate-500">
+                <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm font-semibold text-slate-500">
                   Nenhuma resposta registrada ainda.
                 </div>
               ) : (
                 comments.map((comment) => (
-                  <article key={comment.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                  <article key={comment.id} className="enterprise-card p-4">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <strong className="text-sm font-black text-slate-950">{comment.authorName}</strong>
                       <span className="text-xs font-semibold text-slate-500">{formatDate(comment.createdAt)}</span>
@@ -162,7 +162,7 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
                         href={comment.attachmentUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-3 inline-flex rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-black text-sky-800 transition hover:bg-sky-100"
+                        className="mt-3 inline-flex rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-black text-blue-800 transition hover:bg-blue-100"
                       >
                         Abrir anexo: {comment.attachmentName ?? 'arquivo'}
                       </a>
@@ -173,7 +173,7 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
             </div>
           </div>
 
-          <aside className="border-t border-slate-200 bg-slate-50 p-5 lg:border-l lg:border-t-0">
+          <aside className="border-t border-slate-200 bg-slate-50/80 p-5 lg:border-l lg:border-t-0">
             <h3 className="text-sm font-black uppercase tracking-[0.18em] text-slate-500">Responder</h3>
 
             {errorMessage && (
@@ -191,7 +191,7 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
                   placeholder="Escreva uma resposta para o chamado."
-                  className="w-full resize-none rounded-md border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+                  className="enterprise-input w-full resize-none px-4 py-3 text-sm placeholder:text-slate-400"
                 />
                 <p className="mt-1 text-right text-xs text-slate-500">{message.length}/700</p>
               </div>
@@ -202,7 +202,7 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
                   type="file"
                   accept="image/*,.pdf"
                   onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                  className="w-full rounded-md border border-dashed border-slate-300 bg-white px-3 py-3 text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-sm file:font-bold file:text-white"
+                  className="w-full rounded-xl border border-dashed border-slate-300 bg-white px-3 py-3 text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-sm file:font-bold file:text-white"
                 />
                 <p className="mt-2 text-xs leading-5 text-slate-500">Aceita imagens ou PDF de ate 5MB.</p>
               </div>
@@ -210,7 +210,7 @@ function TicketDetailsModal({ ticket, onClose }: TicketDetailsModalProps) {
               <button
                 type="submit"
                 disabled={loading || !canSubmit}
-                className="rounded-md bg-sky-700 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="enterprise-button-primary px-4 py-3 text-sm disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-300 disabled:shadow-none"
               >
                 {loading ? 'Enviando...' : 'Enviar resposta'}
               </button>

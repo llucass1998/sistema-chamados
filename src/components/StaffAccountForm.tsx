@@ -80,9 +80,9 @@ function StaffAccountForm() {
   };
 
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 bg-sky-50 px-5 py-4">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-700">Area do administrador</p>
+    <section className="enterprise-panel mt-6 overflow-hidden">
+      <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
+        <p className="enterprise-kicker">Area do administrador</p>
         <h2 className="mt-2 text-lg font-black tracking-tight text-slate-950">Criar conta de T.I/admin</h2>
         <p className="mt-1 text-sm text-slate-500">
           Crie acessos internos para a equipe tecnica gerenciar e fechar chamados.
@@ -110,7 +110,7 @@ function StaffAccountForm() {
             value={form.login}
             onChange={handleChange}
             placeholder="Nome do tecnico"
-            className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            className="enterprise-input w-full px-4 py-3 placeholder:text-slate-400"
           />
         </div>
 
@@ -123,7 +123,7 @@ function StaffAccountForm() {
             value={form.email}
             onChange={handleChange}
             placeholder="ti@empresa.com"
-            className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            className="enterprise-input w-full px-4 py-3 placeholder:text-slate-400"
           />
         </div>
 
@@ -137,7 +137,7 @@ function StaffAccountForm() {
             value={form.password}
             onChange={handleChange}
             placeholder="Min. 6"
-            className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            className="enterprise-input w-full px-4 py-3 placeholder:text-slate-400"
           />
         </div>
 
@@ -147,7 +147,7 @@ function StaffAccountForm() {
             name="role"
             value={form.role}
             onChange={handleChange}
-            className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            className="enterprise-input w-full px-4 py-3"
           >
             <option value="tecnico">Tecnico</option>
             <option value="admin">Admin</option>
@@ -162,14 +162,14 @@ function StaffAccountForm() {
             value={form.companyId}
             onChange={handleChange}
             placeholder="EMP-2026"
-            className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+            className="enterprise-input w-full px-4 py-3 placeholder:text-slate-400"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-[#0f172a] px-5 py-3 font-black text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-60 lg:col-span-5"
+          className="enterprise-button-primary px-5 py-3 disabled:opacity-60 lg:col-span-5"
         >
           {loading ? 'Criando...' : 'Criar acesso tecnico'}
         </button>

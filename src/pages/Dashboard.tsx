@@ -11,7 +11,7 @@ import { auth, db } from '../firebaseConfig';
 import { useAuth } from '../hooks/useAuth';
 import type { Ticket, TicketCategory, TicketPriority } from '../types';
 import { ticketCategories, ticketPriorities } from '../types';
-import { sortTicketsByDate, ticketFromDoc } from '../utils/tickets';
+import { calculateSlaDueAt, getTicketSlaInfo, slaHoursByPriority, sortTicketsByDate, ticketFromDoc } from '../utils/tickets';
 
 interface TicketForm {
   motivo: string;
@@ -68,6 +68,8 @@ function Dashboard() {
       open: tickets.filter((ticket) => ticket.status === 'Aberto').length,
       progress: tickets.filter((ticket) => ticket.status === 'Em andamento').length,
       closed: tickets.filter((ticket) => ticket.status === 'Fechado').length,
+      // Mostra para o solicitante se algum chamado dele ja estourou o prazo combinado.
+      slaBreached: tickets.filter((ticket) => getTicketSlaInfo(ticket).isBreached).length,
     }),
     [tickets],
   );
@@ -120,6 +122,9 @@ function Dashboard() {
     setLoading(true);
 
     try {
+      // O prazo e salvo na abertura para manter o historico mesmo se a regra mudar depois.
+      const slaHours = slaHoursByPriority[form.prioridade];
+
       await addDoc(collection(db, 'tickets'), {
         motivo: form.motivo.trim(),
         descricao: form.descricao.trim(),
@@ -132,6 +137,9 @@ function Dashboard() {
         companyId: profile.companyId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        slaDueAt: calculateSlaDueAt(form.prioridade),
+        slaHours,
+        slaPolicy: 'priority-standard-v1',
       });
 
       setForm(initialForm);
@@ -157,7 +165,7 @@ function Dashboard() {
         isStaff ? (
           <Link
             to="/admin"
-            className="rounded-md bg-sky-700 px-4 py-2 text-sm font-black text-white shadow-sm transition hover:bg-sky-800"
+            className="enterprise-button-primary px-4 py-2 text-sm"
           >
             Painel tecnico
           </Link>
@@ -171,14 +179,15 @@ function Dashboard() {
       <StatusAlert message={message} type="success" />
       <StatusAlert message={errorMessage} type="error" />
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-5">
         <MetricCard label="Total" value={metrics.total} />
         <MetricCard label="Abertos" value={metrics.open} tone="blue" />
         <MetricCard label="Em andamento" value={metrics.progress} tone="amber" />
         <MetricCard label="Fechados" value={metrics.closed} tone="emerald" />
+        <MetricCard label="SLA vencido" value={metrics.slaBreached} tone="red" />
       </section>
 
-      <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
+      <section className="enterprise-panel mt-6 overflow-hidden">
         <div className="flex flex-col gap-4 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-black tracking-tight text-slate-950">Meus chamados</h2>
@@ -193,7 +202,7 @@ function Dashboard() {
               <select
                 value={categoryFilter}
                 onChange={(event) => setCategoryFilter(event.target.value as TicketCategory | 'Todas')}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100 sm:w-40"
+                className="enterprise-input w-full px-3 py-2 text-sm font-bold sm:w-40"
               >
                 <option value="Todas">Todas</option>
                 {ticketCategories.map((category) => (
@@ -211,7 +220,7 @@ function Dashboard() {
               <select
                 value={priorityFilter}
                 onChange={(event) => setPriorityFilter(event.target.value as TicketPriority | 'Todas')}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100 sm:w-40"
+                className="enterprise-input w-full px-3 py-2 text-sm font-bold sm:w-40"
               >
                 <option value="Todas">Todas</option>
                 {ticketPriorities.map((priority) => (
@@ -227,7 +236,7 @@ function Dashboard() {
                 clearMessages();
                 setIsCreating((current) => !current);
               }}
-              className="rounded-md bg-[#0f172a] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800"
+              className="enterprise-button-primary px-4 py-2.5 text-sm"
             >
               {isCreating ? 'Fechar formulario' : 'Novo chamado'}
             </button>
@@ -235,7 +244,7 @@ function Dashboard() {
         </div>
 
         {isCreating && (
-          <form onSubmit={handleSubmit} className="grid gap-4 border-b border-slate-200 bg-slate-50 px-5 py-5">
+          <form onSubmit={handleSubmit} className="grid gap-4 border-b border-slate-200 bg-slate-50/70 px-5 py-5">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-bold text-slate-700">Motivo</label>
@@ -246,7 +255,7 @@ function Dashboard() {
                   value={form.motivo}
                   onChange={(event) => setForm((current) => ({ ...current, motivo: event.target.value }))}
                   placeholder="Ex: Impressora sem conexao"
-                  className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+                  className="enterprise-input w-full px-4 py-3 placeholder:text-slate-400"
                 />
               </div>
 
@@ -255,7 +264,7 @@ function Dashboard() {
                 <select
                   value={form.categoria}
                   onChange={(event) => setForm((current) => ({ ...current, categoria: event.target.value as TicketCategory }))}
-                  className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+                  className="enterprise-input w-full px-4 py-3"
                 >
                   {ticketCategories.map((category) => (
                     <option key={category} value={category}>
@@ -276,7 +285,7 @@ function Dashboard() {
                   value={form.descricao}
                   onChange={(event) => setForm((current) => ({ ...current, descricao: event.target.value }))}
                   placeholder="Descreva o problema com detalhes."
-                  className="w-full resize-none rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+                  className="enterprise-input w-full resize-none px-4 py-3 placeholder:text-slate-400"
                 />
                 <p className="mt-1 text-right text-xs text-slate-500">{form.descricao.length}/500</p>
               </div>
@@ -286,7 +295,7 @@ function Dashboard() {
                 <select
                   value={form.prioridade}
                   onChange={(event) => setForm((current) => ({ ...current, prioridade: event.target.value as TicketPriority }))}
-                  className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+                  className="enterprise-input w-full px-4 py-3"
                 >
                   {ticketPriorities.map((priority) => (
                     <option key={priority} value={priority}>
@@ -301,14 +310,14 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={() => setIsCreating(false)}
-                className="rounded-md border border-slate-300 bg-white px-5 py-3 font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="enterprise-button-secondary px-5 py-3"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-md bg-sky-700 px-5 py-3 font-black text-white shadow-sm transition hover:bg-sky-800 disabled:opacity-60"
+                className="enterprise-button-primary px-5 py-3 disabled:opacity-60"
               >
                 {loading ? 'Abrindo...' : 'Abrir chamado'}
               </button>
@@ -318,7 +327,7 @@ function Dashboard() {
 
         <div className="grid gap-3 p-5">
           {filteredTickets.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm font-semibold text-slate-500">
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-8 text-center text-sm font-semibold text-slate-500">
               Nenhum chamado encontrado para os filtros atuais.
             </div>
           ) : (

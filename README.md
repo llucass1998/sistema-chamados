@@ -19,8 +19,12 @@ Este projeto conversa diretamente com uma rotina real de suporte tecnico, por is
 - Listagem dos chamados do usuario logado
 - Categoria do chamado
 - Prioridade do chamado
+- Politica de SLA por prioridade
+- Prazo de SLA gravado no chamado
+- Indicadores de SLA vencido e SLA em risco
 - Status do chamado: `Aberto`, `Em andamento` e `Fechado`
 - Painel tecnico/admin para visualizar todos os chamados
+- Busca por chamado, solicitante, e-mail, empresa ou responsavel tecnico
 - Filtros por status, categoria e prioridade
 - Atualizacao de status em tempo real via Firestore
 - Fechamento de chamado pelo tecnico/admin
@@ -155,10 +159,26 @@ Exemplo de documento:
   "companyId": "EMP-2026",
   "createdAt": "timestamp",
   "updatedAt": "timestamp",
+  "slaDueAt": "timestamp",
+  "slaHours": 24,
+  "slaPolicy": "priority-standard-v1",
   "closedAt": null,
   "closedBy": null
 }
 ```
+
+## Politica de SLA
+
+A versao Enterprise 2.0 calcula o prazo de atendimento com base na prioridade:
+
+| Prioridade | Prazo |
+| --- | --- |
+| Urgente | 4 horas |
+| Alta | 8 horas |
+| Media | 24 horas |
+| Baixa | 48 horas |
+
+O painel tecnico destaca chamados com SLA vencido ou em risco, ajudando o time de T.I a priorizar atendimentos criticos.
 
 ### tickets/{ticketId}/comments
 
@@ -279,6 +299,8 @@ npm run deploy:firebase # Build + deploy no Firebase Hosting
 - Notificacoes por e-mail
 - Dashboard com graficos
 - Historico de SLA/tempo medio de atendimento
+- Auditoria detalhada de mudancas de status
+- Multiempresa com isolamento por organizacao
 
 ## Autor
 

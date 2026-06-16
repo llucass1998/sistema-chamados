@@ -30,6 +30,10 @@ export interface Ticket {
   companyId: string;
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
+  // SLA corporativo: prazo e politica usados nos alertas do cliente e do painel tecnico.
+  slaDueAt?: Timestamp | null;
+  slaHours?: number;
+  slaPolicy?: string;
   resolvedAt?: Timestamp | null;
   closedAt?: Timestamp | null;
   closedBy?: string;

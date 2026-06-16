@@ -14,7 +14,7 @@ function StatusAlert({ message, type }: StatusAlertProps) {
       : 'border-red-200 bg-red-50 text-red-900';
 
   return (
-    <div className={`mb-4 rounded-lg border px-4 py-3 text-sm font-bold shadow-sm ${classes}`}>
+    <div className={`mb-4 rounded-xl border px-4 py-3 text-sm font-bold shadow-sm ${classes}`}>
       {message}
     </div>
   );
